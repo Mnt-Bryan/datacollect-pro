@@ -23,7 +23,7 @@ if "page" not in st.session_state:
 
 # Lire la page depuis les parametres URL
 params = st.query_params
-if "page" in params:
+if "page" in params and st.session_state.page == "Accueil":
     st.session_state.page = params["page"]
 
 menu = st.session_state.page
@@ -409,7 +409,7 @@ st.markdown(f"""
         <a href="?page=Accueil"    class="{accueil_class}">Accueil</a>
         <a href="?page=Formulaire" class="{form_class}">Formulaire</a>
         <a href="?page=Analyse"    class="{analyse_class}">Analyse</a>
-        <a href="?page=Données"    class="{donnees_class}">Données</a>
+        <a href="?page=Donn%C3%A9es" class="{donnees_class}">Données</a>
     </div>
     <div class="nav-footer">
         DataCollect Pro &copy; 2026<br>Commerce & Entreprise
