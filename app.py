@@ -12,7 +12,7 @@ st.set_page_config(
     page_title="DataCollect Pro",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # ============================================
@@ -20,6 +20,13 @@ st.set_page_config(
 # ============================================
 if "page" not in st.session_state:
     st.session_state.page = "Accueil"
+
+# Lire la page depuis les parametres URL
+params = st.query_params
+if "page" in params:
+    st.session_state.page = params["page"]
+
+menu = st.session_state.page
 
 # ============================================
 # CONNEXION SUPABASE
@@ -68,7 +75,7 @@ def exporter_excel(df):
     return chemin
 
 # ============================================
-# DESIGN CSS
+# DESIGN CSS + NAVBAR
 # ============================================
 st.markdown("""
 <style>
@@ -77,101 +84,96 @@ st.markdown("""
 
     .main { background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf3 100%); }
 
-    /* Cache tout ce qui concerne la sidebar Streamlit */
+    /* Cacher completement la sidebar Streamlit */
     section[data-testid="stSidebar"] { display: none !important; }
     div[data-testid="collapsedControl"] { display: none !important; }
+    button[data-testid="baseButton-headerNoPadding"] { display: none !important; }
 
-    /* Navigation fixe a gauche */
+    /* Navbar fixe */
     .nav-container {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 240px;
+        top: 0; left: 0;
+        width: 220px;
         height: 100vh;
         background: linear-gradient(180deg, #0f1729 0%, #1a2f5e 50%, #0f1729 100%);
         z-index: 9999;
         display: flex;
         flex-direction: column;
-        padding: 0;
         box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+        overflow: hidden;
     }
-
     .nav-logo {
         text-align: center;
-        padding: 30px 15px 20px 15px;
+        padding: 28px 15px 18px 15px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
     }
     .nav-logo-icon {
-        width: 50px;
-        height: 50px;
+        width: 48px; height: 48px;
         background: linear-gradient(135deg, #4f8ef7, #1a56db);
         border-radius: 12px;
+        margin: 0 auto 10px auto;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 10px auto;
-        font-size: 1.5em;
+        font-size: 1.4em;
         box-shadow: 0 4px 15px rgba(79,142,247,0.4);
     }
     .nav-logo h2 {
-        color: white;
-        font-size: 1.1em;
+        color: white !important;
+        font-size: 1em;
         font-weight: 700;
         letter-spacing: 2px;
         text-transform: uppercase;
-        margin: 0 0 4px 0;
+        margin: 0 0 3px 0;
     }
     .nav-logo p {
-        color: rgba(255,255,255,0.4);
-        font-size: 0.7em;
+        color: rgba(255,255,255,0.4) !important;
+        font-size: 0.65em;
         letter-spacing: 1px;
         text-transform: uppercase;
         margin: 0;
     }
-
     .nav-menu {
-        padding: 20px 12px;
+        padding: 18px 10px;
         flex: 1;
     }
-    .nav-btn {
+    .nav-link {
         display: block;
-        width: 100%;
-        padding: 12px 16px;
-        margin-bottom: 6px;
+        padding: 11px 16px;
+        margin-bottom: 5px;
         border-radius: 10px;
-        color: rgba(255,255,255,0.6);
-        font-size: 0.88em;
+        color: rgba(255,255,255,0.6) !important;
+        font-size: 0.87em;
         font-weight: 500;
-        cursor: pointer;
+        text-decoration: none !important;
         transition: all 0.2s ease;
         border: none;
-        background: transparent;
-        text-align: left;
         letter-spacing: 0.3px;
     }
-    .nav-btn:hover {
+    .nav-link:hover {
         background: rgba(255,255,255,0.08);
-        color: white;
+        color: white !important;
+        text-decoration: none !important;
     }
-    .nav-btn.active {
+    .nav-link.active {
         background: linear-gradient(135deg, #1a56db, #4f8ef7);
-        color: white;
+        color: white !important;
         box-shadow: 0 4px 12px rgba(26,86,219,0.4);
     }
-
     .nav-footer {
         padding: 15px;
         border-top: 1px solid rgba(255,255,255,0.08);
         text-align: center;
-        font-size: 0.7em;
-        color: rgba(255,255,255,0.25);
+        font-size: 0.65em;
+        color: rgba(255,255,255,0.25) !important;
     }
 
-    /* Contenu principal decale pour laisser place a la nav */
-    .main-content {
-        margin-left: 240px;
-        padding: 25px 30px;
-        min-height: 100vh;
+    /* Contenu principal */
+    .block-container {
+        padding-top: 20px !important;
+        padding-left: 240px !important;
+        padding-right: 20px !important;
+        max-width: 100% !important;
     }
 
     /* En-tete */
@@ -207,7 +209,7 @@ st.markdown("""
     .header-badge {
         display: inline-block;
         background: rgba(79,142,247,0.25);
-        color: #7eb3ff;
+        color: #7eb3ff !important;
         font-size: 0.7em;
         padding: 3px 12px;
         border-radius: 20px;
@@ -310,7 +312,7 @@ st.markdown("""
         to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* Boutons Streamlit */
+    /* Boutons */
     .stButton > button {
         background: linear-gradient(135deg, #1a56db 0%, #4f8ef7 100%);
         color: white;
@@ -341,7 +343,7 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    /* Champs formulaire */
+    /* Champs */
     .stTextInput > div > input,
     .stNumberInput > div > input,
     .stTextArea > div > textarea {
@@ -359,7 +361,7 @@ st.markdown("""
         box-shadow: 0 0 0 3px rgba(79,142,247,0.1);
     }
 
-    /* Notification succes */
+    /* Notification */
     .success-banner {
         background: linear-gradient(135deg, #ecfdf5, #d1fae5);
         border: 1px solid #6ee7b7;
@@ -385,65 +387,35 @@ st.markdown("""
     #MainMenu { visibility: hidden; }
     footer    { visibility: hidden; }
     header    { visibility: hidden; }
-
-    /* Masquer padding par defaut de Streamlit */
-    .block-container {
-        padding-top: 0 !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        max-width: 100% !important;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# NAVIGATION FIXE PERSONNALISEE
+# NAVBAR FIXE
 # ============================================
-pages = ["Accueil", "Formulaire", "Analyse", "Données"]
-
-nav_buttons = ""
-for p in pages:
-    active = "active" if st.session_state.page == p else ""
-    nav_buttons += f"""
-        <button class="nav-btn {active}"
-            onclick="window.location.href='?page={p}'">{p}
-        </button>
-    """
+accueil_class  = "nav-link active" if menu == "Accueil"    else "nav-link"
+form_class     = "nav-link active" if menu == "Formulaire" else "nav-link"
+analyse_class  = "nav-link active" if menu == "Analyse"    else "nav-link"
+donnees_class  = "nav-link active" if menu == "Données"    else "nav-link"
 
 st.markdown(f"""
-    <div class="nav-container">
-        <div class="nav-logo">
-            <div class="nav-logo-icon">📊</div>
-            <h2>DataCollect</h2>
-            <p>Pro Edition</p>
-        </div>
-        <div class="nav-menu">
-            {nav_buttons}
-        </div>
-        <div class="nav-footer">
-            DataCollect Pro &copy; 2026<br>Commerce & Entreprise
-        </div>
+<div class="nav-container">
+    <div class="nav-logo">
+        <div class="nav-logo-icon">📊</div>
+        <h2>DataCollect</h2>
+        <p>Pro Edition</p>
     </div>
-    <div class="main-content">
+    <div class="nav-menu">
+        <a href="?page=Accueil"    class="{accueil_class}">Accueil</a>
+        <a href="?page=Formulaire" class="{form_class}">Formulaire</a>
+        <a href="?page=Analyse"    class="{analyse_class}">Analyse</a>
+        <a href="?page=Données"    class="{donnees_class}">Données</a>
+    </div>
+    <div class="nav-footer">
+        DataCollect Pro &copy; 2026<br>Commerce & Entreprise
+    </div>
+</div>
 """, unsafe_allow_html=True)
-
-# Lire le parametre de navigation dans l'URL
-params = st.query_params
-if "page" in params:
-    st.session_state.page = params["page"]
-
-menu = st.session_state.page
-
-# ============================================
-# NAVIGATION STREAMLIT CACHEE (pour garder
-# la logique de session)
-# ============================================
-with st.sidebar:
-    menu = st.radio("", pages,
-        index=pages.index(st.session_state.page),
-        key="nav_radio"
-    )
-    st.session_state.page = menu
 
 # ============================================
 # PAGE ACCUEIL
@@ -524,7 +496,6 @@ elif menu == "Formulaire":
     """, unsafe_allow_html=True)
 
     with st.form("formulaire", clear_on_submit=True):
-
         st.markdown('<div class="form-card">', unsafe_allow_html=True)
         st.markdown('<div class="form-section-title">01 — Informations générales</div>', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
@@ -752,5 +723,3 @@ elif menu == "Données":
                     file_name="donnees.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
-
-st.markdown('</div>', unsafe_allow_html=True)
